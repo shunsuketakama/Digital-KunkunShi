@@ -1,0 +1,40 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+input, select, button, textarea {
+  font: inherit;
+}
+
+.kunkunshi-row {
+  display: grid;
+  grid-template-columns: 90px 90px 1fr 80px;
+  gap: 8px;
+  padding: 6px 0;
+}
