@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const keys = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
@@ -18,8 +18,18 @@ export function SongForm() {
   const [isSubmitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [recordingSupported, setRecordingSupported] = useState(true);
 
   const selectedAudio = recordedFile ?? audio;
+
+  useEffect(() => {
+    setRecordingSupported(typeof window !== "undefined" && typeof window.MediaRecorder !== "undefined" && !!navigator.mediaDevices?.getUserMedia);
+    return () => {
+      if (recordedUrl) {
+        URL.revokeObjectURL(recordedUrl);
+      }
+    };
+  }, [recordedUrl]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,6 +66,9 @@ export function SongForm() {
   async function startRecording() {
     setError(null);
     try {
+      if (!recordingSupported) {
+        throw new Error("このブラウザは録音に対応していません");
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const chunks: Blob[] = [];
       const mediaRecorder = new MediaRecorder(stream);
@@ -123,9 +136,11 @@ export function SongForm() {
         />
       </label>
       <div style={{ marginBottom: 12 }}>
-        <p style={{ marginTop: 0 }}>録音はブラウザのマイク入力を使用します（YouTube 音源は取得しません）。</p>
-        <button type="button" onClick={startRecording} disabled={isRecording}>録音開始</button>{" "}
-        <button type="button" onClick={stopRecording} disabled={!isRecording}>録音停止</button>
+        <h3 style={{ margin: "8px 0" }}>録音（マイク入力）</h3>
+        <p style={{ marginTop: 0 }}>録音はブラウザのマイク入力を使用します。YouTube の動画/音声はダウンロード・抽出しません。</p>
+        <button type="button" onClick={startRecording} disabled={isRecording || !recordingSupported}>録音開始</button>{" "}
+        <button type="button" onClick={stopRecording} disabled={!isRecording || !recordingSupported}>録音停止</button>
+        {!recordingSupported ? <p style={{ color: "crimson", marginBottom: 0 }}>このブラウザでは録音機能を利用できません。</p> : null}
       </div>
       {recordedUrl ? <audio controls src={recordedUrl} style={{ width: "100%", marginBottom: 12 }} /> : null}
       <label>
